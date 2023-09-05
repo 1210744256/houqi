@@ -3,7 +3,17 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: duxin521
-    url: jdbc:mysql://192.168.228.133:3306/baizhi_work?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT
+    url: jdbc:mysql://192.168.228.133:3306/houqi?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT
+  redis:
+    host: 192.168.228.133
+    port: 7000
+    database: 0
 mybatis-plus:
   mapper-locations: classpath:com/baizhi/mapper/*.xml
   type-aliases-package: com.baizhi.entity
+server:
+  servlet:
+    context-path: /api
+logging:
+  level:
+    com.baizhi: DEBUG
