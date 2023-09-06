@@ -20,11 +20,9 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 12107
@@ -44,48 +42,61 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public Result login(String code, LoginRequest loginResult, String session) {
-        log.debug("loginresult:{}"+loginResult);
+        log.debug("loginresult:{}" + loginResult);
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object storageCode = valueOperations.get(RedisConstants.CODE_PREFIX_VALUE + session);
-        log.debug("存储的code:"+storageCode);
-        if(ObjectUtil.isEmpty(storageCode)){
-            return new Result().error(null,"请先获取验证码");
+        log.debug("存储的code:" + storageCode);
+        if (ObjectUtil.isEmpty(storageCode)) {
+            return new Result().error(null, "请先获取验证码");
         }
-        if(StrUtil.isEmpty(code)){
-            return new Result().error(null,"请输入验证码");
+        if (StrUtil.isEmpty(code)) {
+            return new Result().error(null, "请输入验证码");
         }
-        if(!code.equals(storageCode.toString())){
-            return new Result().error(null,"验证码错误");
+        if (!code.equalsIgnoreCase(storageCode.toString())) {
+            return new Result().error(null, "验证码错误");
         }
         QueryWrapper<Admin> adminQueryWrapper = new QueryWrapper<>();
-        adminQueryWrapper.eq("username",loginResult.username);
-        adminQueryWrapper.eq("password",loginResult.password);
+        adminQueryWrapper.eq("username", loginResult.username);
+//        adminQueryWrapper.eq("password", loginResult.password);
         Admin admin = adminMapper.selectOne(adminQueryWrapper);
-        log.debug("admin:{}"+admin);
-        if(admin==null){
-            return new Result().error(null,"用户名或密码错误");
+        log.debug("admin:{}" + admin);
+        if (admin == null) {
+            return new Result().error(null, "用户名错误");
+        }
+//        用户名存在进行密码
+        String salt = admin.getSalt();
+        String password = loginResult.getPassword();
+        for (int i = 0; i < 3; i++) {
+
+            password= DigestUtils.md5DigestAsHex((salt+password).getBytes());
+        }
+        if(!admin.getPassword().equals(password)){
+            return new Result().error(null, "密码错误");
         }
         AdminResponse adminResponse = new AdminResponse();
-        BeanUtils.copyProperties(admin,adminResponse);
+        BeanUtils.copyProperties(admin, adminResponse);
         return new Result().ok(adminResponse);
     }
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public Map<String,Object> queryByPage(int page, int limit) {
+    public Map<String, Object> queryByPage(int page, int limit) {
         Map<String, Object> map = new HashMap<>();
-        Page<Admin> adminPage = new Page<>(page,limit);
-        Page<Admin> adminPage1 = adminMapper.selectPage(adminPage, null);
+        Page<Admin> adminPage = new Page<>(page, limit);
+//        倒序条件
+        QueryWrapper<Admin> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc(Arrays.asList("gmt_create", "id"));
+        Page<Admin> adminPage1 = adminMapper.selectPage(adminPage, wrapper);
         List<Admin> records = adminPage1.getRecords();
-        List<AdminResponse> responses=new ArrayList<>();
-        for(Admin admin:records){
-            AdminResponse adminResponse=new AdminResponse();
-            BeanUtils.copyProperties(admin,adminResponse);
+        List<AdminResponse> responses = new ArrayList<>();
+        for (Admin admin : records) {
+            AdminResponse adminResponse = new AdminResponse();
+            BeanUtils.copyProperties(admin, adminResponse);
             responses.add(adminResponse);
         }
         long total = adminPage1.getTotal();
-        map.put("total",total);
-        map.put("result",responses);
+        map.put("total", total);
+        map.put("result", responses);
 
         //分页查询后，将分页信息放
 //        BeanUtils.copyProperties(records,responses);
@@ -94,16 +105,25 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
 
     @Override
     public Result add(LoginRequest loginRequest) {
+//        DigestUtils.md5Digest();
 //        先查询用户名是否存在
         QueryWrapper<Admin> adminQueryWrapper = new QueryWrapper<>();
-        adminQueryWrapper.eq("username",loginRequest.username);
+        adminQueryWrapper.eq("username", loginRequest.username);
         Admin admin = adminMapper.selectOne(adminQueryWrapper);
-        if(admin!=null){
-            return new Result().error(null,"用户名已存在");
+        if (admin != null) {
+            return new Result().error(null, "用户名已存在");
+        }
+        //        密码加密
+//        盐
+        String salt = UUID.randomUUID().toString().substring(0,16);
+        String password = loginRequest.getPassword();
+        for (int i = 0; i < 3; i++) {
+            password= DigestUtils.md5DigestAsHex((salt+password).getBytes());
         }
         Admin admin1 = new Admin();
-        admin1.setPassword(loginRequest.getPassword());
+        admin1.setPassword(password);
         admin1.setUsername(loginRequest.getUsername());
+        admin1.setSalt(salt);
         adminMapper.insert(admin1);
         return new Result().ok();
     }

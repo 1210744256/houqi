@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.*;
 import util.VerifyCodeUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RequestMapping("/admin")
@@ -48,7 +47,7 @@ public class AdminController {
 //            String code = lineCaptcha.getCode();
 //            System.out.println(code);
             ValueOperations valueOperations = redisTemplate.opsForValue();
-            valueOperations.set(RedisConstants.CODE_PREFIX_VALUE + id, cd);
+            valueOperations.set(RedisConstants.CODE_PREFIX_VALUE + id, cd, 30, TimeUnit.MINUTES);
             return new Result().ok(base64Image);
         } catch (Exception e) {
             return new Result().error(null, "网络错误");
@@ -58,11 +57,11 @@ public class AdminController {
     //    /api/admin/login
 //    管理员登录
     @PostMapping("/login")
-    public Result login(String code, String username, String password, HttpSession session) {
+    public Result login(String code, @RequestBody LoginRequest loginRequest, HttpSession session) {
         String id = session.getId();
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setPassword(password);
-        loginRequest.setUsername(username);
+//        LoginRequest loginRequest = new LoginRequest();
+//        loginRequest.setPassword(password);
+//        loginRequest.setUsername(username);
         Result login = adminService.login(code, loginRequest, id);
         if (login.getStatus()) {
             redisTemplate.opsForValue().set(RedisConstants.LOGIN_PREFIX_VALUE + id, login.getData(), 30, TimeUnit.MINUTES);
@@ -73,10 +72,10 @@ public class AdminController {
     //    分页查询所有管理员
 //    /api/admin/queryByPage
     @GetMapping("/queryByPage")
-    public Result queryByPage(Integer page, Integer limit) {
+    public Result queryByPage(Integer page, Integer size) {
         try {
             QueryWrapper<Admin> wrapper = new QueryWrapper<>();
-            Map<String, Object> map = adminService.queryByPage(page, limit);
+            Map<String, Object> map = adminService.queryByPage(page, size);
             return new Result().ok(map);
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,11 +117,11 @@ public class AdminController {
     //    添加管理员
 //    /api/admin/addAdmin
     @PostMapping("/addAdmin")
-    public Result addAdmin(String username, String password) {
+    public Result addAdmin(@RequestBody LoginRequest loginRequest) {
         try {
-            LoginRequest loginRequest = new LoginRequest();
-            loginRequest.setUsername(username);
-            loginRequest.setPassword(password);
+//            LoginRequest loginRequest = new LoginRequest();
+//            loginRequest.setUsername(username);
+//            loginRequest.setPassword(password);
             return adminService.add(loginRequest);
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,16 +133,17 @@ public class AdminController {
     //    修改管理员密码
 //    /api/admin/changePassword
     @PostMapping("/changePassword")
-    public Result changePassword(Integer id, String password) {
+    public Result changePassword(@RequestBody Admin admin) {
         try {
-            QueryWrapper<Admin> wrapper = new QueryWrapper<>();
-            wrapper.eq("id", id);
-            wrapper.select("password","id");
-            Admin admin = adminService.getOne(wrapper);
+            //        密码加密
+//        盐
+            String salt = UUID.randomUUID().toString().substring(0,16);
+            String password = admin.getPassword();
+            for (int i = 0; i < 3; i++) {
+                password = DigestUtils.md5DigestAsHex((salt + password).getBytes());
+            }
             admin.setPassword(password);
-//            UpdateWrapper<Admin> updateWrapper = new UpdateWrapper<>();
-//            updateWrapper.eq("id",id);
-//            adminService.update(admin,updateWrapper);
+            admin.setSalt(salt);
             adminService.updateById(admin);
             return new Result().ok();
         } catch (Exception e) {
