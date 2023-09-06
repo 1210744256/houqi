@@ -1,5 +1,6 @@
 package com.baizhi.service;
 
+import com.baizhi.dto.Result;
 import com.baizhi.entity.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,5 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2023-09-05 11:27:23
 */
 public interface CategoryService extends IService<Category> {
-
+    public Result queryLevels(Integer page, Integer size, int levels, Integer parentId);
 }
