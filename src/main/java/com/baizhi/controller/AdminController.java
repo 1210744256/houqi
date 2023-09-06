@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import util.VerifyCodeUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,15 +39,17 @@ public class AdminController {
     @GetMapping("/getVerifyImage")
     public Result getVerifyImage(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
         try {
+            String cd = VerifyCodeUtil.generateVerifyCode(4);
+            String base64Image = VerifyCodeUtil.createBase64Image(cd);
             String id = session.getId();
             System.out.println(id);
             LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
             BufferedImage image = lineCaptcha.getImage();
-            String code = lineCaptcha.getCode();
-            System.out.println(code);
+//            String code = lineCaptcha.getCode();
+//            System.out.println(code);
             ValueOperations valueOperations = redisTemplate.opsForValue();
-            valueOperations.set(RedisConstants.CODE_PREFIX_VALUE + id, code);
-            return new Result().ok(code);
+            valueOperations.set(RedisConstants.CODE_PREFIX_VALUE + id, cd);
+            return new Result().ok(base64Image);
         } catch (Exception e) {
             return new Result().error(null, "网络错误");
         }

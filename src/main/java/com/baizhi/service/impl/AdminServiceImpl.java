@@ -1,6 +1,7 @@
 package com.baizhi.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baizhi.config.RedisConstants;
 import com.baizhi.dto.AdminResponse;
 import com.baizhi.dto.LoginRequest;
@@ -49,6 +50,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
         log.debug("存储的code:"+storageCode);
         if(ObjectUtil.isEmpty(storageCode)){
             return new Result().error(null,"请先获取验证码");
+        }
+        if(StrUtil.isEmpty(code)){
+            return new Result().error(null,"请输入验证码");
         }
         if(!code.equals(storageCode.toString())){
             return new Result().error(null,"验证码错误");
