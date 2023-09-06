@@ -3,7 +3,6 @@ package com.baizhi.controller;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import com.baizhi.config.RedisConstants;
-import com.baizhi.dto.AdminResponse;
 import com.baizhi.dto.LoginRequest;
 import com.baizhi.dto.Result;
 import com.baizhi.entity.Admin;
@@ -22,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @RequestMapping("/admin")
@@ -74,8 +73,8 @@ public class AdminController {
     public Result queryByPage(Integer page, Integer limit) {
         try {
             QueryWrapper<Admin> wrapper = new QueryWrapper<>();
-            List<AdminResponse> responses = adminService.queryByPage(page, limit);
-            return new Result().ok(responses);
+            Map<String, Object> map = adminService.queryByPage(page, limit);
+            return new Result().ok(map);
         } catch (Exception e) {
             e.printStackTrace();
             return new Result().error(null, "网络错误");
@@ -136,6 +135,7 @@ public class AdminController {
         try {
             QueryWrapper<Admin> wrapper = new QueryWrapper<>();
             wrapper.eq("id", id);
+            wrapper.select("password","id");
             Admin admin = adminService.getOne(wrapper);
             admin.setPassword(password);
 //            UpdateWrapper<Admin> updateWrapper = new UpdateWrapper<>();

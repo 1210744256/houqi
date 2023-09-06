@@ -5,14 +5,13 @@ import com.baizhi.config.RedisConstants;
 import com.baizhi.dto.AdminResponse;
 import com.baizhi.dto.LoginRequest;
 import com.baizhi.dto.Result;
+import com.baizhi.entity.Admin;
+import com.baizhi.mapper.AdminMapper;
+import com.baizhi.service.AdminService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baizhi.entity.Admin;
-import com.baizhi.service.AdminService;
-import com.baizhi.mapper.AdminMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.transaction.Transaction;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +21,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 12107
@@ -67,7 +68,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public List<AdminResponse> queryByPage(int page, int limit) {
+    public Map<String,Object> queryByPage(int page, int limit) {
+        Map<String, Object> map = new HashMap<>();
         Page<Admin> adminPage = new Page<>(page,limit);
         Page<Admin> adminPage1 = adminMapper.selectPage(adminPage, null);
         List<Admin> records = adminPage1.getRecords();
@@ -77,9 +79,13 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
             BeanUtils.copyProperties(admin,adminResponse);
             responses.add(adminResponse);
         }
+        long total = adminPage1.getTotal();
+        map.put("total",total);
+        map.put("result",responses);
+
         //分页查询后，将分页信息放
 //        BeanUtils.copyProperties(records,responses);
-        return responses;
+        return map;
     }
 
     @Override
