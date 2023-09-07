@@ -8,14 +8,21 @@ spring:
     host: 192.168.228.133
     port: 7000
     database: 0
+#  # 修改请求映射
+#  mvc:
+#    static-path-pattern: /**
+#  # 修改静态资源目录
+#  web:
+#    resources:
+#      static-locations: [ /img/ ]
 mybatis-plus:
   mapper-locations: classpath:com/baizhi/mapper/*.xml
   type-aliases-package: com.baizhi.entity
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-server:
-  servlet:
-    context-path: /api
+#server:
+#  servlet:
+#    context-path: /api
 #  port: 8082
 logging:
   level:

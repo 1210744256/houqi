@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @RestController
 @Slf4j
 //@ResponseBody

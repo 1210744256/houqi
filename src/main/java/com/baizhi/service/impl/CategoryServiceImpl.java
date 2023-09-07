@@ -31,6 +31,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
     @Transactional(propagation = Propagation.SUPPORTS)
     public Result queryLevels(Integer page, Integer size, int levels, Integer parentId) {
         QueryWrapper<Category> wrapper = new QueryWrapper<>();
+        wrapper.eq("levels", levels);
+        if (parentId != null) {
+            wrapper.eq("parent_id", parentId);
+        }
         wrapper.select("id", "cate_name", "levels", "parent_id");
         wrapper.orderByDesc(Arrays.asList("gmt_create", "id"));
         if (page == null) {
@@ -39,11 +43,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
             return new Result().ok(categories);
         }
 //        如果有页数
-        Page<Category> categoryPage = new Page<>(page,size);
+        Page<Category> categoryPage = new Page<>(page, size);
         Page<Category> pages = categoryMapper.selectPage(categoryPage, wrapper);
         HashMap<String, Object> map = new HashMap<>();
-        map.put("result",pages.getRecords());
-        map.put("total",pages.getTotal());
+        map.put("result", pages.getRecords());
+        map.put("total", pages.getTotal());
         return new Result().ok(map);
     }
 }
