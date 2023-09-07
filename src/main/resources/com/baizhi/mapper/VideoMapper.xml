@@ -5,23 +5,58 @@
 <mapper namespace="com.baizhi.mapper.VideoMapper">
 
     <resultMap id="BaseResultMap" type="com.baizhi.entity.Video">
-            <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="title" column="title" jdbcType="VARCHAR"/>
-            <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="coverPath" column="cover_path" jdbcType="VARCHAR"/>
-            <result property="videoPath" column="video_path" jdbcType="VARCHAR"/>
-            <result property="status" column="status" jdbcType="INTEGER"/>
-            <result property="gmtCreate" column="gmt_create" jdbcType="TIMESTAMP"/>
-            <result property="categoryId" column="category_id" jdbcType="INTEGER"/>
-            <result property="userId" column="user_id" jdbcType="INTEGER"/>
-            <result property="gmtModified" column="gmt_modified" jdbcType="TIMESTAMP"/>
-            <result property="deleted" column="deleted" jdbcType="TINYINT"/>
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="coverPath" column="cover_path" jdbcType="VARCHAR"/>
+        <result property="videoPath" column="video_path" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="gmtCreate" column="gmt_create" jdbcType="TIMESTAMP"/>
+        <result property="categoryId" column="category_id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="gmtModified" column="gmt_modified" jdbcType="TIMESTAMP"/>
+        <result property="deleted" column="deleted" jdbcType="TINYINT"/>
+    </resultMap>
+    <resultMap id="all" type="com.baizhi.entity.Video">
+        <id property="id" column="vid" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="coverPath" column="cover_path" jdbcType="VARCHAR"/>
+        <result property="videoPath" column="video_path" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="gmtCreate" column="gmt_create" jdbcType="TIMESTAMP"/>
+        <result property="gmtModified" column="gmt_modified" jdbcType="TIMESTAMP"/>
+        <result property="deleted" column="deleted" jdbcType="TINYINT"/>
+        <association property="user" javaType="User">
+            <id column="uid" property="id" javaType="INTEGER"/>
+            <result column="username" property="username"></result>
+        </association>
+        <association property="category" javaType="Category">
+            <id column="cid" property="id" javaType="INTEGER"/>
+            <result column="cate_name" property="cateName"></result>
+        </association>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,title,description,
+        id
+        ,title,description,
         cover_path,video_path,status,
         gmt_create,category_id,user_id,
         gmt_modified,deleted
     </sql>
+    <select id="searchVideo" resultMap="all">
+        select v.id vid,title,description,
+        cover_path,video_path,v.status,
+        v.gmt_create,v.gmt_modified,c.id cid,c.cate_name,u.id uid,u.username
+        from
+        (select <include refid="Base_Column_List"></include> from yx_video where
+        deleted=0
+        <if test="title!=null and !title.isEmpty()">
+            and title like concat('%',#{title},'%')
+        </if>
+        order by gmt_create desc ,id desc
+        limit #{page},#{size})v
+        left join yx_user u on v.user_id = u.id
+        left join yx_category c on v.category_id = c.id
+    </select>
 </mapper>

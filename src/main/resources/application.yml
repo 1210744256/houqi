@@ -8,6 +8,10 @@ spring:
     host: 192.168.228.133
     port: 7000
     database: 0
+  servlet:
+    multipart:
+      max-file-size: 50GB
+      max-request-size: 50GB
 #  # 修改请求映射
 #  mvc:
 #    static-path-pattern: /**

@@ -1,10 +1,11 @@
 package com.baizhi.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 
@@ -48,6 +49,7 @@ public class Video implements Serializable {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonProperty("createTime")
     private Date gmtCreate;
 
     /**
@@ -71,7 +73,12 @@ public class Video implements Serializable {
      */
     @TableLogic
     private Integer deleted;
+    @TableField(exist = false)
+    private Category category;
+    @TableField(exist = false)
+    private User user;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
 }
