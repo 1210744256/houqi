@@ -1,5 +1,6 @@
 package com.baizhi.service;
 
+import com.baizhi.dto.Result;
 import com.baizhi.entity.Log;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,5 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2023-09-05 11:27:23
 */
 public interface LogService extends IService<Log> {
-
+    public Result queryByPage(int page, int size, String startTime, String endTime);
 }

@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.concurrent.TimeUnit;
 
 @Aspect
 @Component
@@ -29,6 +30,8 @@ public class LogAspect {
 
     @Around("execution(* com.baizhi.service.impl.*.add*(..))")
     public Object arroud(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object target = joinPoint.getTarget();
+        target=target.toString();
         Log log = new Log();
         Signature signature = joinPoint.getSignature();
         System.out.println("执行的方法名为" + signature.getName());
@@ -43,16 +46,26 @@ public class LogAspect {
             log.setOptionStatus(0);
         }
         logMapper.insert(log);
+        redisTemplate.delete(target);
         return proceed;
     }
     @Around(value = "execution(* com.baizhi.service.impl.*.*(..))")
     public Object around2(ProceedingJoinPoint joinPoint) throws Throwable {
+        //重新设置存活时间
+        redisTemplate.expire(RedisConstants.LOGIN_PREFIX_VALUE+session.getId(),30, TimeUnit.MINUTES);
 //        获取目标对象
         Object target = joinPoint.getTarget();
-        target=target.toString().split("@")[0];
+        target=target.toString();
+        Object[] args = joinPoint.getArgs();
+        StringBuilder sb = new StringBuilder();
+        for (Object arg : args) {
+            sb.append(arg);
+        }
+        System.out.println("参数为"+args.toString());
 //        获取目标方法
         Signature signature = joinPoint.getSignature();
         String name = signature.getName();
+        name=sb.append(name).toString();
         HashOperations hash = redisTemplate.opsForHash();
 //        根据目标对象和方法名看是否能获取结果
         Object result = hash.get(target, name);

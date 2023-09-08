@@ -1,10 +1,11 @@
 package com.baizhi.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.google.j2objc.annotations.Property;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 
@@ -28,6 +29,7 @@ public class Log implements Serializable {
      * 操作时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @Property("createTime")
     private Date gmtCreate;
 
     /**
