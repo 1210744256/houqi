@@ -4,6 +4,7 @@ import com.baizhi.config.MinioClientConfig;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.minio.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
- 
+
 /**
  * @Author yang
  * @Date 2023/1/3 14:15
@@ -21,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Component
 public class MinioUtil {
+    @Autowired
+    private MinioClient minioClient;
     /**
      * Minio文件上传
      *
@@ -31,7 +34,7 @@ public class MinioUtil {
      */
     public static void minioUpload(MultipartFile file, String fileName, String bucketName) {
         System.out.println("复制启动");
-        InputStream inputStream=null;
+        InputStream inputStream = null;
         try {
             MinioClient minioClient = MinioClientConfig.getMinioClient();
             // fileName为空，说明要使用源文件名上传
@@ -39,7 +42,7 @@ public class MinioUtil {
                 fileName = file.getOriginalFilename();
                 fileName = fileName.replaceAll(" ", "_");
             }
-           inputStream = file.getInputStream();
+            inputStream = file.getInputStream();
             PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(bucketName).object(fileName)
                     .stream(inputStream, file.getSize(), -1).contentType(file.getContentType()).build();
             //文件名称相同会覆盖
@@ -48,8 +51,8 @@ public class MinioUtil {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("上传失败");
-        }finally {
-            if(inputStream!=null){
+        } finally {
+            if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
@@ -58,8 +61,8 @@ public class MinioUtil {
             }
         }
     }
- 
- 
+
+
     /**
      * 检查存储桶是否存在
      *
@@ -79,7 +82,7 @@ public class MinioUtil {
         }
         return false;
     }
- 
+
     /**
      * 获取文件流
      *
@@ -97,8 +100,8 @@ public class MinioUtil {
         }
         return null;
     }
- 
- 
+
+
     /**
      * @param bucketName:
      * @author
@@ -122,6 +125,7 @@ public class MinioUtil {
             log.error(e.getMessage());
         }
     }
+
     /**
      * 下载文件
      *
@@ -151,7 +155,7 @@ public class MinioUtil {
             return null;
         }
     }
- 
+
     /**
      * @param bucketName:
      * @description: 删除桶
@@ -172,6 +176,7 @@ public class MinioUtil {
             log.error(e.getMessage());
         }
     }
+
     /**
      * @param bucketName:
      * @description: 删除桶下面所有文件
@@ -192,7 +197,7 @@ public class MinioUtil {
             log.error(e.getMessage());
         }
     }
- 
+
     /**
      * 根据文件路径得到预览文件绝对地址
      *
@@ -200,13 +205,24 @@ public class MinioUtil {
      * @param fileName
      * @return
      */
-    public String getPreviewFileUrl(String bucketName, String fileName) {
+    public static String getPreviewFileUrl(String bucketName, String fileName) {
         try {
             MinioClient minioClient = MinioClientConfig.getMinioClient();
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().bucket(bucketName).object(fileName).build());
+//            String presignedObjectUrl = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().bucket(bucketName).object(fileName).build());
+//            return presignedObjectUrl;
         } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
     }
+//    public String getPreviewFileUrl(String bucket, String objectName) {
+//        try {
+//            return minioClient.presignedGetObject(bucket, objectName);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return "";
+//        }
+//    }
+
 }

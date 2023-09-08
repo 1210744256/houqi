@@ -2,7 +2,9 @@ package com.baizhi.controller;
 
 import com.baizhi.dto.Result;
 import com.baizhi.entity.Category;
+import com.baizhi.entity.Video;
 import com.baizhi.service.CategoryService;
+import com.baizhi.service.VideoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private VideoService videoService;
 
     @GetMapping("/queryLevels")
     public Result queryLevels(Integer page, Integer size, int levels, Integer parentId) {
@@ -63,6 +67,12 @@ public class CategoryController {
                 } else {
                     return new Result().error(null, "一级类别下不能删除");
                 }
+            }
+            QueryWrapper<Video> wrapper = new QueryWrapper<>();
+            wrapper.eq("category_id", id);
+            long count = videoService.count(wrapper);
+            if(count!=0){
+                return new Result().error(null, "该类别下有视频不能删除");
             }
             categoryService.removeById(id);
             return new Result().ok();

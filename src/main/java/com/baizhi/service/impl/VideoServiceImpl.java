@@ -36,6 +36,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video>
         String afterfix = originalFilename.split("\\.")[1];
         uuid = uuid + "." + afterfix;
         MinioUtil.minioUpload(multipartFile,uuid,BUCKET_NAME);
+        String previewFileUrl = MinioUtil.getPreviewFileUrl(BUCKET_NAME, uuid);
         video.setStatus(1);
         video.setCoverPath("duxin");
         video.setVideoPath(uuid);
