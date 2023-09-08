@@ -27,14 +27,18 @@
         <result property="gmtCreate" column="gmt_create" jdbcType="TIMESTAMP"/>
         <result property="gmtModified" column="gmt_modified" jdbcType="TIMESTAMP"/>
         <result property="deleted" column="deleted" jdbcType="TINYINT"/>
-        <association property="user" javaType="User">
-            <id column="uid" property="id" javaType="INTEGER"/>
-            <result column="username" property="username"></result>
+<!--        <association property="user" javaType="User">-->
+<!--            <id column="uid" property="id" javaType="INTEGER"/>-->
+<!--            <result column="username" property="username"></result>-->
+<!--        </association>-->
+        <association property="category" resultMap="com.baizhi.mapper.CategoryMapper.BaseResultMap" columnPrefix="c_">
+
         </association>
-        <association property="category" javaType="Category">
-            <id column="cid" property="id" javaType="INTEGER"/>
-            <result column="cate_name" property="cateName"></result>
-        </association>
+        <association property="user" resultMap="com.baizhi.mapper.UserMapper.BaseResultMap" columnPrefix="u_"></association>
+<!--        <association property="category" javaType="Category">-->
+<!--            <id column="cid" property="id" javaType="INTEGER"/>-->
+<!--            <result column="cate_name" property="cateName"></result>-->
+<!--        </association>-->
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -47,7 +51,9 @@
     <select id="searchVideo" resultMap="all">
         select v.id vid,title,description,
         cover_path,video_path,v.status,
-        v.gmt_create,v.gmt_modified,c.id cid,c.cate_name,u.id uid,u.username
+        v.gmt_create,v.gmt_modified,
+        c.id c_id,c.cate_name c_cate_name,
+        u.id u_id,u.username u_username
         from
         (select <include refid="Base_Column_List"></include> from yx_video where
         deleted=0

@@ -19,6 +19,10 @@ public class PageTest {
     private CategoryService categoryService;
     @Autowired
     private CategoryMapper categoryMapper;
+//    @Autowired
+//    private MinioUtil minioUtil;
+//    @Autowired
+//    private MinioClientUtils minioClientUtils;
 
     @Test
     public void test2() {
@@ -38,8 +42,7 @@ public class PageTest {
     }
 
     @Test
-    public void test1() {
-        String duxin = MinioUtil.getPreviewFileUrl("duxin", "基础数据结构-001-二分查找-算法描述.mp4");
-        System.out.println(duxin);
+    public void kj() {
+        System.out.println(MinioUtil.bucketExists("duxin"));
     }
 }

@@ -5,8 +5,6 @@ import com.baizhi.dto.Result;
 import com.baizhi.entity.Admin;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.Map;
-
 /**
  * @author 12107
  * @description 针对表【yx_admin】的数据库操作Service
@@ -16,7 +14,7 @@ public interface AdminService extends IService<Admin> {
     Result login(String code, LoginRequest loginResult, String session);
 
     //    List<>
-    Map<String, Object> queryByPage(int page, int limit);
+    Result queryByPage(int page, int limit);
 
     //    添加管理员
     Result add(LoginRequest loginRequest);

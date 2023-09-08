@@ -1,5 +1,6 @@
 package com.baizhi.service.impl;
 
+import com.baizhi.config.StorageProperty;
 import com.baizhi.dto.Result;
 import com.baizhi.entity.Video;
 import com.baizhi.mapper.VideoMapper;
@@ -23,6 +24,8 @@ import java.util.UUID;
 @Service
 public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video>
         implements VideoService {
+    @Autowired
+    private StorageProperty storageProperty;
 //    @Autowired
 //    private MinioUtil minioUtil;
     @Autowired
@@ -36,10 +39,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video>
         String afterfix = originalFilename.split("\\.")[1];
         uuid = uuid + "." + afterfix;
         MinioUtil.minioUpload(multipartFile,uuid,BUCKET_NAME);
-        String previewFileUrl = MinioUtil.getPreviewFileUrl(BUCKET_NAME, uuid);
+//        String previewFileUrl = MinioUtil.getPreviewFileUrl(BUCKET_NAME, uuid);
         video.setStatus(1);
         video.setCoverPath("duxin");
-        video.setVideoPath(uuid);
+        video.setVideoPath(storageProperty.getUrl()+"/"+BUCKET_NAME+"/"+uuid);
         videoMapper.insert(video);
         return null;
     }

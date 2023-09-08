@@ -80,7 +80,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public Map<String, Object> queryByPage(int page, int limit) {
+    public Result queryByPage(int page, int limit) {
         Map<String, Object> map = new HashMap<>();
         Page<Admin> adminPage = new Page<>(page, limit);
 //        倒序条件
@@ -100,7 +100,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin>
 
         //分页查询后，将分页信息放
 //        BeanUtils.copyProperties(records,responses);
-        return map;
+        return new Result().ok(map);
     }
 
     @Override

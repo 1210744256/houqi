@@ -89,6 +89,16 @@
             <artifactId>minio</artifactId>
             <version>8.3.4</version>
         </dependency>
+<!--        &lt;!&ndash;minio文件服务&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>io.minio</groupId>-->
+<!--            <artifactId>minio</artifactId>-->
+<!--            <version>7.1.0</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

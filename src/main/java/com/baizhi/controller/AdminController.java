@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -75,8 +74,8 @@ public class AdminController {
     public Result queryByPage(Integer page, Integer size) {
         try {
             QueryWrapper<Admin> wrapper = new QueryWrapper<>();
-            Map<String, Object> map = adminService.queryByPage(page, size);
-            return new Result().ok(map);
+            return adminService.queryByPage(page, size);
+
         } catch (Exception e) {
             e.printStackTrace();
             return new Result().error(null, "网络错误");

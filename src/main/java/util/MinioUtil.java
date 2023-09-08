@@ -216,7 +216,7 @@ public class MinioUtil {
             return "";
         }
     }
-//    public String getPreviewFileUrl(String bucket, String objectName) {
+//    public  String getPreviewFileUrl(String bucket, String objectName) {
 //        try {
 //            return minioClient.presignedGetObject(bucket, objectName);
 //        } catch (Exception e) {
