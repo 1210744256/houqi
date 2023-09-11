@@ -2,6 +2,7 @@ package com.baizhi.controller;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import com.baizhi.annotation.AddCache;
 import com.baizhi.config.RedisConstants;
 import com.baizhi.dto.LoginRequest;
 import com.baizhi.dto.Result;
@@ -101,6 +102,7 @@ public class AdminController {
     //    /api/admin/me
 //    获取当前登录的管理员的信息
     @GetMapping("/me")
+    @AddCache
     public Result me(HttpSession session) {
         try {
             String id = session.getId();
